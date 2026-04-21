@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI培训问答助手 - 智能培训解决方案</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --bg-elevated: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --accent-primary: #6366f1;
+            --accent-secondary: #8b5cf6;
+            --accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --user-bubble: var(--accent-gradient);
+            --ai-bubble: #f1f5f9;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --bg-elevated: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: #334155;
+            --ai-bubble: #334155;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.4);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.5);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* App Layout */
+        .app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .logo-text {
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+
+        .logo-subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .header-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s ease;
+        }
+
+        .header-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            transform: translateY(-2px);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            background: var(--bg-tertiary);
+            padding: 1rem 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            flex-shrink: 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .quick-btn {
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quick-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        /* Chat Container */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Welcome Message */
+        .welcome {
+            text-align: center;
+            padding: 3rem 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .welcome-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--accent-gradient);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: white;
+        }
+
+        .welcome h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .suggestions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .suggestion-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .suggestion-card:hover {
+            border-color: var(--accent-primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .suggestion-card h4 {
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .suggestion-card p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        /* Message Bubbles */
+        .message {
+            display: flex;
+            gap: 1rem;
+            max-width: 800px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            margin-left: auto;
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .message.assistant .message-avatar {
+            background: var(--accent-gradient);
+            color: white;
+        }
+
+        .message.user .message-avatar {
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-bubble {
+            padding: 1rem 1.25rem;
+            border-radius: 16px;
+            position: relative;
+        }
+
+        .message.assistant .message-bubble {
+            background: var(--ai-bubble);
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user .message-bubble {
+            background: var(--user-bubble);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-text {
+            font-size: 0.9375rem;
+            line-height: 1.7;
+        }
+
+        .message-text p {
+            margin-bottom: 0.75rem;
+        }
+
+        .message-text p:last-child {
+            margin-bottom: 0;
+        }
+
+        .message-text ul, .message-text ol {
+            margin: 0.75rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .message-text li {
+            margin-bottom: 0.5rem;
+        }
+
+        .message-text strong {
+            font-weight: 600;
+        }
+
+        .message-text h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 1rem 0 0.5rem;
+            color: var(--accent-primary);
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .message.user .message-time {
+            text-align: right;
+        }
+
+        /* Code Block */
+        .code-block {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.75rem 0;
+            overflow-x: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        /* Template Card */
+        .template-card {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.75rem 0;
+        }
+
+        .template-card h5 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--accent-primary);
+        }
+
+        .template-card pre {
+            background: var(--bg-tertiary);
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.8125rem;
+            overflow-x: auto;
+        }
+
+        /* Copy Button */
+        .copy-btn {
+            padding: 0.375rem 0.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+        }
+
+        .copy-btn:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 1rem;
+        }
+
+        .typing-indicator span {
+            width: 8px;
+            height: 8px;
+            background: var(--text-muted);
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+
+        /* Input Area */
+        .input-area {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .input-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            padding: 0.75rem;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--accent-primary);
+            background: var(--bg-secondary);
+        }
+
+        .input-field {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+            resize: none;
+            outline: none;
+            max-height: 150px;
+            min-height: 24px;
+            font-family: inherit;
+            line-height: 1.5;
+        }
+
+        .input-field::placeholder {
+            color: var(--text-muted);
+        }
+
+        .send-btn {
+            width: 44px;
+            height: 44px;
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* API Key Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 500px;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.9375rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .form-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 0.75rem;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 500;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn.secondary {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .modal-btn.primary {
+            background: var(--accent-gradient);
+            border: none;
+            color: white;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            bottom: 100px;
+            right: 1.5rem;
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .toast {
+            padding: 1rem 1.25rem;
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--error); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* GitHub Corner */
+        .github-corner {
+            position: fixed;
+            top: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .github-corner svg {
+            width: 80px;
+            height: 80px;
+            fill: var(--accent-primary);
+            transition: transform 0.3s ease;
+        }
+
+        .github-corner:hover svg {
+            transform: scale(1.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .logo-text {
+                font-size: 1rem;
+            }
+
+            .logo-subtitle {
+                display: none;
+            }
+
+            .quick-actions {
+                padding: 0.75rem 1rem;
+                overflow-x: auto;
+                flex-wrap: nowrap;
+            }
+
+            .quick-btn {
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .chat-container {
+                padding: 1rem;
+            }
+
+            .message {
+                max-width: 100%;
+            }
+
+            .suggestions {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- GitHub Corner -->
+        <a href="https://github.com/ASJ-Alita/training-assistant" target="_blank" class="github-corner">
+            <svg viewBox="0 0 250 250">
+                <path d="M0,0 L115,115 C15,85 5,55 0,0 Z"/>
+                <path fill="white" d="M128,3 C94,3 65,32 65,66 L65,85 L50,85 C46,85 42,89 42,93 L42,120 L36,120 C32,120 28,124 28,128 L28,155 C28,159 32,163 36,163 L60,163 C64,163 68,159 68,155 L68,128 L90,128 C95,163 120,183 145,183 C170,183 195,163 200,128 L200,155 C200,159 204,163 208,163 L232,163 C236,163 240,159 240,155 L240,128 C240,124 236,120 232,120 L226,120 L226,93 C226,89 222,85 218,85 L203,85 L203,66 C203,32 174,3 140,3 L128,3 Z"/>
+            </svg>
+        </a>
+
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i data-lucide="graduation-cap" width="22" height="22"></i>
+                    </div>
+                    <div>
+                        <div class="logo-text">AI培训问答助手</div>
+                        <div class="logo-subtitle">智能培训解决方案</div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-actions">
+                <button class="header-btn" id="settingsBtn" title="API设置">
+                    <i data-lucide="settings" width="18" height="18"></i>
+                </button>
+                <button class="header-btn" id="clearBtn" title="清空对话">
+                    <i data-lucide="trash-2" width="18" height="18"></i>
+                </button>
+                <button class="header-btn" id="themeBtn" title="切换主题">
+                    <i data-lucide="moon" width="18" height="18"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <button class="quick-btn" data-question="新员工入职培训方案">
+                <i data-lucide="user-plus" width="16" height="16"></i>
+                新员工培训
+            </button>
+            <button class="quick-btn" data-question="如何设计领导力培训课程">
+                <i data-lucide="crown" width="16" height="16"></i>
+                领导力培训
+            </button>
+            <button class="quick-btn" data-question="培训效果评估方法">
+                <i data-lucide="bar-chart-2" width="16" height="16"></i>
+                效果评估
+            </button>
+            <button class="quick-btn" data-question="提高培训参与度的技巧">
+                <i data-lucide="users" width="16" height="16"></i>
+                参与度提升
+            </button>
+            <button class="quick-btn" data-question="培训需求分析方法">
+                <i data-lucide="search" width="16" height="16"></i>
+                需求分析
+            </button>
+        </div>
+
+        <!-- Chat Container -->
+        <div class="chat-container" id="chatContainer">
+            <!-- Welcome Message -->
+            <div class="welcome" id="welcome">
+                <div class="welcome-icon">
+                    <i data-lucide="bot" width="40" height="40"></i>
+                </div>
+                <h2>您好！我是您的AI培训助手</h2>
+                <p>我可以帮您解决培训工作中的各种问题，包括课程设计、培训方法、效果评估等</p>
+                <div class="suggestions">
+                    <div class="suggestion-card" data-question="如何设计一门新员工入职培训课程？">
+                        <h4>📚 新员工培训设计</h4>
+                        <p>了解入职培训的完整设计流程</p>
+                    </div>
+                    <div class="suggestion-card" data-question="培训效果不好，有什么改进方法？">
+                        <h4>📈 培训效果提升</h4>
+                        <p>诊断问题并提供解决方案</p>
+                    </div>
+                    <div class="suggestion-card" data-question="如何做培训需求调研？">
+                        <h4>🔍 培训需求调研</h4>
+                        <p>掌握需求分析的实用方法</p>
+                    </div>
+                    <div class="suggestion-card" data-question="推荐一些培训方法">
+                        <h4>🎯 培训方法推荐</h4>
+                        <p>根据场景推荐最适合的方法</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <textarea
+                        class="input-field"
+                        id="inputField"
+                        placeholder="输入您的培训问题..."
+                        rows="1"
+                    ></textarea>
+                    <button class="send-btn" id="sendBtn" disabled>
+                        <i data-lucide="send" width="20" height="20"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Key Modal -->
+    <div class="modal-overlay" id="apiModal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">⚙️ API设置</h3>
+                <button class="modal-close" id="closeModal">
+                    <i data-lucide="x" width="18" height="18"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">选择AI模型</label>
+                    <select class="form-input" id="modelSelect">
+                        <option value="gpt-3.5-turbo">GPT-3.5 Turbo（快速）</option>
+                        <option value="gpt-4">GPT-4（高质量）</option>
+                        <option value="claude">Claude（推荐）</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">API Key</label>
+                    <input type="password" class="form-input" id="apiKeyInput" placeholder="sk-...">
+                    <p class="form-hint">您的API密钥仅存储在本地浏览器中，不会被上传到任何服务器</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" id="cancelModal">取消</button>
+                <button class="modal-btn primary" id="saveModal">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // ==================== State ====================
+        const state = {
+            apiKey: localStorage.getItem('training_assistant_api_key') || '',
+            model: localStorage.getItem('training_assistant_model') || 'gpt-3.5-turbo',
+            messages: JSON.parse(localStorage.getItem('training_assistant_messages') || '[]'),
+            isTyping: false,
+            theme: localStorage.getItem('training_assistant_theme') || 'light'
+        };
+
+        // ==================== DOM Elements ====================
+        const elements = {
+            chatContainer: document.getElementById('chatContainer'),
+            welcome: document.getElementById('welcome'),
+            inputField: document.getElementById('inputField'),
+            sendBtn: document.getElementById('sendBtn'),
+            themeBtn: document.getElementById('themeBtn'),
+            clearBtn: document.getElementById('clearBtn'),
+            settingsBtn: document.getElementById('settingsBtn'),
+            apiModal: document.getElementById('apiModal'),
+            closeModal: document.getElementById('closeModal'),
+            cancelModal: document.getElementById('cancelModal'),
+            saveModal: document.getElementById('saveModal'),
+            apiKeyInput: document.getElementById('apiKeyInput'),
+            modelSelect: document.getElementById('modelSelect'),
+            toastContainer: document.getElementById('toastContainer')
+        };
+
+        // ==================== Training Knowledge Base ====================
+        const trainingKnowledge = {
+            '新员工培训': {
+                framework: [
+                    '【第一天】公司文化与制度',
+                    '【第二至三天】岗位技能培训',
+                    '【第四天】实战演练与考核',
+                    '【第五天】入职总结与反馈'
+                ],
+                content: [
+                    '1. 公司愿景、使命、价值观',
+                    '2. 组织架构与部门介绍',
+                    '3. 规章制度与行为规范',
+                    '4. 岗位工作流程与职责',
+                    '5. 绩效考核标准说明'
+                ],
+                tips: [
+                    '安排导师制，帮助新员工快速融入',
+                    '设计互动环节，提高参与度',
+                    '提供培训手册，方便随时查阅',
+                    '设置考核环节，确保培训效果'
+                ]
+            },
+            '领导力培训': {
+                core: [
+                    '自我认知与情绪管理',
+                    '团队建设与沟通技巧',
+                    '目标管理与绩效辅导',
+                    '变革领导与创新思维',
+                    '教练技术与反馈方法'
+                ],
+                methods: [
+                    '情境模拟演练',
+                    '案例分析讨论',
+                    '领导力测评反馈',
+                    '导师辅导计划',
+                    '行动学习项目'
+                ]
+            },
+            '效果评估': {
+                model: '柯氏四级评估模型',
+                levels: [
+                    '【一级】反应层：学员满意度',
+                    '【二级】学习层：知识技能掌握',
+                    '【三级】行为层：工作行为改变',
+                    '【四级】结果层：业务指标改善'
+                ],
+                methods: [
+                    '课后问卷调查',
+                    '知识技能测试',
+                    '行为观察记录',
+                    '绩效考核对比',
+                    'ROI计算分析'
+                ]
+            },
+            '需求分析': {
+                steps: [
+                    '1. 组织分析：明确业务目标与培训战略',
+                    '2. 任务分析：梳理岗位关键任务与能力要求',
+                    '3. 人员分析：评估现有人员能力差距',
+                    '4. 优先级排序：根据业务重要性和紧迫性确定培训重点'
+                ],
+                methods: [
+                    '问卷调研',
+                    '访谈调研',
+                    '绩效数据分析',
+                    '观察法',
+                    '焦点小组'
+                ]
+            }
+        };
+
+        // ==================== Initialize ====================
+        function init() {
+            // Set theme
+            document.documentElement.setAttribute('data-theme', state.theme);
+            updateThemeIcon();
+
+            // Load saved messages
+            renderMessages();
+
+            // Check if API key exists
+            if (!state.apiKey) {
+                setTimeout(() => showApiModal(), 1000);
+            }
+        }
+
+        // ==================== Message Handling ====================
+        function addMessage(role, content) {
+            state.messages.push({ role, content, time: new Date().toISOString() });
+            saveMessages();
+            renderMessages();
+            scrollToBottom();
+        }
+
+        function renderMessages() {
+            if (state.messages.length === 0) {
+                elements.welcome.style.display = 'block';
+                return;
+            }
+
+            elements.welcome.style.display = 'none';
+
+            const messagesHtml = state.messages.map(msg => {
+                const time = new Date(msg.time).toLocaleTimeString('zh-CN', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                const avatarIcon = msg.role === 'assistant' ? 'bot' : 'user';
+                const avatarClass = msg.role === 'assistant' ? 'assistant' : 'user';
+
+                return `
+                    <div class="message ${avatarClass}">
+                        <div class="message-avatar">
+                            <i data-lucide="${avatarIcon}" width="18" height="18"></i>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                <div class="message-text">${formatContent(msg.content)}</div>
+                            </div>
+                            <div class="message-time">${time}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            elements.chatContainer.innerHTML = messagesHtml;
+            lucide.createIcons();
+        }
+
+        function formatContent(content) {
+            // Convert markdown-like formatting
+            let formatted = content
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\n\n/g, '</p><p>')
+                .replace(/\n/g, '<br>');
+
+            // Wrap in paragraph
+            formatted = '<p>' + formatted + '</p>';
+
+            // Add copy buttons to code blocks
+            formatted = formatted.replace(
+                /<pre>(.*?)<\/pre>/g,
+                '<div class="code-block"><pre>$1</pre><button class="copy-btn" onclick="copyCode(this)"><i data-lucide="copy" width="14" height="14"></i> 复制</button></div>'
+            );
+
+            return formatted;
+        }
+
+        function saveMessages() {
+            localStorage.setItem('training_assistant_messages', JSON.stringify(state.messages));
+        }
+
+        function scrollToBottom() {
+            elements.chatContainer.scrollTop = elements.chatContainer.scrollHeight;
+        }
+
+        // ==================== AI Response ====================
+        async function generateResponse(userQuestion) {
+            if (!state.apiKey) {
+                showApiModal();
+                return;
+            }
+
+            state.isTyping = true;
+            elements.sendBtn.disabled = true;
+
+            // Show typing indicator
+            const typingHtml = `
+                <div class="message assistant" id="typingMessage">
+                    <div class="message-avatar">
+                        <i data-lucide="bot" width="18" height="18"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-bubble">
+                            <div class="typing-indicator">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            elements.chatContainer.insertAdjacentHTML('beforeend', typingHtml);
+            lucide.createIcons();
+            scrollToBottom();
+
+            try {
+                // Build prompt with training knowledge
+                const systemPrompt = `你是专业的企业培训顾问助手。你的职责是：
+
+1. 回答关于企业培训的各种问题
+2. 提供实用的培训方案和模板
+3. 分享培训行业的最佳实践
+
+【你的专长领域】
+- 培训需求分析（组织分析、任务分析、人员分析）
+- 课程设计与开发（ADDIE模型、SAM敏捷开发）
+- 培训方法选择（讲授法、案例法、角色扮演、行动学习等）
+- 培训效果评估（柯氏四级评估、ROI计算）
+- 培训师培养（授课技巧、课堂管理）
+- 培训体系搭建（培训规划、课程体系、学习路径）
+
+【回答风格】
+- 专业、实用、有条理
+- 适当使用表格、列表、emoji
+- 提供具体的操作步骤和模板示例
+- 结合实际案例说明
+
+【知识库】
+新员工培训框架：
+- 第一天：公司文化与制度
+- 第二至三天：岗位技能培训
+- 第四天：实战演练与考核
+- 第五天：入职总结与反馈
+
+领导力培训核心模块：
+- 自我认知与情绪管理
+- 团队建设与沟通技巧
+- 目标管理与绩效辅导
+- 变革领导与创新思维
+- 教练技术与反馈方法
+
+培训效果评估（柯氏四级）：
+- 一级：反应层 - 学员满意度
+- 二级：学习层 - 知识技能掌握
+- 三级：行为层 - 工作行为改变
+- 四级：结果层 - 业务指标改善
+
+请用中文回答，格式清晰，易于阅读。`;
+
+                // Call API
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${state.apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: state.model,
+                        messages: [
+                            { role: 'system', content: systemPrompt },
+                            ...state.messages.slice(-10).map(m => ({
+                                role: m.role,
+                                content: m.content
+                            })),
+                            { role: 'user', content: userQuestion }
+                        ],
+                        stream: false
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('API请求失败');
+                }
+
+                const data = await response.json();
+                const aiResponse = data.choices[0].message.content;
+
+                // Remove typing indicator
+                document.getElementById('typingMessage')?.remove();
+
+                // Add user message
+                addMessage('user', userQuestion);
+
+                // Add AI response
+                addMessage('assistant', aiResponse);
+
+            } catch (error) {
+                console.error('Error:', error);
+
+                // Remove typing indicator
+                document.getElementById('typingMessage')?.remove();
+
+                // Show error message
+                const errorResponse = `抱歉，遇到了一个问题：${error.message}
+
+请检查：
+1. API Key是否正确
+2. API Key是否有足够的配额
+3. 网络连接是否正常
+
+您可以点击右上角的设置按钮重新配置API。`;
+
+                addMessage('assistant', errorResponse);
+                showToast('生成失败，请检查API设置', 'error');
+            }
+
+            state.isTyping = false;
+            elements.sendBtn.disabled = false;
+        }
+
+        // ==================== UI Functions ====================
+        function showApiModal() {
+            elements.apiModal.classList.add('active');
+            elements.apiKeyInput.value = state.apiKey;
+            elements.modelSelect.value = state.model;
+        }
+
+        function hideApiModal() {
+            elements.apiModal.classList.remove('active');
+        }
+
+        function toggleTheme() {
+            state.theme = state.theme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', state.theme);
+            localStorage.setItem('training_assistant_theme', state.theme);
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const icon = elements.themeBtn.querySelector('i');
+            icon.setAttribute('data-lucide', state.theme === 'light' ? 'moon' : 'sun');
+            lucide.createIcons();
+        }
+
+        function clearChat() {
+            if (confirm('确定要清空所有对话记录吗？')) {
+                state.messages = [];
+                saveMessages();
+                renderMessages();
+                showToast('对话已清空', 'success');
+            }
+        }
+
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i data-lucide="${type === 'success' ? 'check-circle' : 'alert-circle'}" width="18" height="18"></i>
+                <span>${message}</span>
+            `;
+            elements.toastContainer.appendChild(toast);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function copyCode(btn) {
+            const codeBlock = btn.previousElementSibling;
+            const code = codeBlock.textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                showToast('代码已复制', 'success');
+            });
+        }
+
+        // ==================== Event Listeners ====================
+        elements.sendBtn.addEventListener('click', () => {
+            const question = elements.inputField.value.trim();
+            if (question && !state.isTyping) {
+                generateResponse(question);
+                elements.inputField.value = '';
+                elements.inputField.style.height = 'auto';
+            }
+        });
+
+        elements.inputField.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                elements.sendBtn.click();
+            }
+        });
+
+        elements.inputField.addEventListener('input', () => {
+            elements.inputField.style.height = 'auto';
+            elements.inputField.style.height = Math.min(elements.inputField.scrollHeight, 150) + 'px';
+            elements.sendBtn.disabled = !elements.inputField.value.trim();
+        });
+
+        elements.themeBtn.addEventListener('click', toggleTheme);
+        elements.clearBtn.addEventListener('click', clearChat);
+        elements.settingsBtn.addEventListener('click', showApiModal);
+        elements.closeModal.addEventListener('click', hideApiModal);
+        elements.cancelModal.addEventListener('click', hideApiModal);
+
+        elements.saveModal.addEventListener('click', () => {
+            state.apiKey = elements.apiKeyInput.value.trim();
+            state.model = elements.modelSelect.value;
+            localStorage.setItem('training_assistant_api_key', state.apiKey);
+            localStorage.setItem('training_assistant_model', state.model);
+            hideApiModal();
+            showToast('设置已保存', 'success');
+        });
+
+        // Quick action buttons
+        document.querySelectorAll('.quick-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const question = btn.dataset.question;
+                elements.inputField.value = question;
+                elements.sendBtn.disabled = false;
+                generateResponse(question);
+            });
+        });
+
+        // Suggestion cards
+        document.querySelectorAll('.suggestion-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const question = card.dataset.question;
+                elements.inputField.value = question;
+                elements.sendBtn.disabled = false;
+                generateResponse(question);
+            });
+        });
+
+        // Close modal on outside click
+        elements.apiModal.addEventListener('click', (e) => {
+            if (e.target === elements.apiModal) {
+                hideApiModal();
+            }
+        });
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>

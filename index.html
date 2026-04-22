@@ -844,9 +844,6 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <script>
-        // Initialize Lucide icons
-        lucide.createIcons();
-
         // ==================== State ====================
         const state = {
             messages: JSON.parse(localStorage.getItem('training_assistant_messages') || '[]'),
@@ -1683,53 +1680,75 @@ ADDIE是经典的课程设计与开发框架：
         }
 
         // ==================== Event Listeners ====================
-        elements.sendBtn.addEventListener('click', () => {
-            const question = elements.inputField.value.trim();
-            if (question && !state.isTyping) {
-                generateResponse(question);
-                elements.inputField.value = '';
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM loaded, binding events...');
+            
+            // Initialize Lucide icons
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+
+            // Main send button
+            elements.sendBtn.addEventListener('click', () => {
+                const question = elements.inputField.value.trim();
+                if (question && !state.isTyping) {
+                    generateResponse(question);
+                    elements.inputField.value = '';
+                    elements.inputField.style.height = 'auto';
+                }
+            });
+
+            // Input field keyboard events
+            elements.inputField.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    elements.sendBtn.click();
+                }
+            });
+
+            // Input field auto-resize
+            elements.inputField.addEventListener('input', () => {
                 elements.inputField.style.height = 'auto';
-            }
-        });
-
-        elements.inputField.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                elements.sendBtn.click();
-            }
-        });
-
-        elements.inputField.addEventListener('input', () => {
-            elements.inputField.style.height = 'auto';
-            elements.inputField.style.height = Math.min(elements.inputField.scrollHeight, 150) + 'px';
-            elements.sendBtn.disabled = !elements.inputField.value.trim();
-        });
-
-        elements.themeBtn.addEventListener('click', toggleTheme);
-        elements.clearBtn.addEventListener('click', clearChat);
-
-        // Quick action buttons
-        document.querySelectorAll('.quick-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const question = btn.dataset.question;
-                elements.inputField.value = question;
-                elements.sendBtn.disabled = false;
-                generateResponse(question);
+                elements.inputField.style.height = Math.min(elements.inputField.scrollHeight, 150) + 'px';
+                elements.sendBtn.disabled = !elements.inputField.value.trim();
             });
-        });
 
-        // Suggestion cards
-        document.querySelectorAll('.suggestion-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const question = card.dataset.question;
-                elements.inputField.value = question;
-                elements.sendBtn.disabled = false;
-                generateResponse(question);
+            // Theme toggle
+            elements.themeBtn.addEventListener('click', toggleTheme);
+
+            // Clear chat
+            elements.clearBtn.addEventListener('click', clearChat);
+
+            // Quick action buttons
+            document.querySelectorAll('.quick-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const question = btn.dataset.question;
+                    if (question) {
+                        elements.inputField.value = question;
+                        elements.sendBtn.disabled = false;
+                        generateResponse(question);
+                    }
+                });
             });
-        });
 
-        // Initialize
-        init();
+            // Suggestion cards
+            document.querySelectorAll('.suggestion-card').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const question = card.dataset.question;
+                    if (question) {
+                        elements.inputField.value = question;
+                        elements.sendBtn.disabled = false;
+                        generateResponse(question);
+                    }
+                });
+            });
+
+            // Initialize app
+            init();
+            console.log('App initialized successfully');
+        });
     </script>
 </body>
 </html>

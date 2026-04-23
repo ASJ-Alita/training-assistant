@@ -1,3 +1,24 @@
+<div align="center">
+
+# 🏢 Training Toolkit
+
+> 用 AI 重塑企业培训全流程
+
+[![Training Toolkit](https://img.shields.io/badge/🧩-Training_Toolkit-2D9CDB?style=flat-square)](#)
+[![Assistant](https://img.shields.io/badge/💬-Q&A_Assistant-3498DB?style=flat-square)](#)
+[![HTML/CSS/JS](https://img.shields.io/badge/Frontend-ES6+-E44D26?style=flat-square&logo=html5)](#)
+[![GitHub Pages](https://img.shields.io/badge/Deploy-GitHub_Pages-222?style=flat-square&logo=github)](#)
+
+**AI 培训问答助手** — 培训从业者的随身顾问
+
+培训方法论、课程设计、效果评估、方案模板，输入场景即可获得专业建议 + 对话记忆。
+
+🧩 **产品矩阵** → [知识库问答](https://github.com/ASJ-Alita/rag-knowledge-base) · [培训需求分析](https://github.com/ASJ-Alita/training-analyzer) · [培训效果评估](https://github.com/ASJ-Alita/kirkpatrick-eval) · [效果追踪器](https://github.com/ASJ-Alita/training-tracker) · [智能出题](https://github.com/ASJ-Alita/quiz-generator)
+
+</div>
+
+---
+
 # 🚀 AI Training Assistant - 智能培训问答助手
 
 > 基于AI的培训行业问答助手，帮助培训从业者解决工作中的实际问题
